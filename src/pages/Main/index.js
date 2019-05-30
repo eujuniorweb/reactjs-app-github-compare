@@ -7,6 +7,7 @@ import api from '../../services/api';
 
 export default class Main extends Component {
   state = {
+    loading: false,
     input: '',
     repositories: [],
     repositoryError: false,
@@ -14,6 +15,7 @@ export default class Main extends Component {
 
   handleAddRepository = async (event) => {
     event.preventDefault();
+    this.setState({ loading: true });
     try {
       const { data: repository } = await api.get(`/repos/${this.state.input}`);
       repository.lastCommit = moment(repository.pushed_at).fromNow();
@@ -24,6 +26,8 @@ export default class Main extends Component {
       });
     } catch (error) {
       this.setState({ repositoryError: true });
+    } finally {
+      this.setState({ loading: false });
     }
   };
 
@@ -40,7 +44,9 @@ export default class Main extends Component {
               this.setState({ input: event.target.value });
             }}
           />
-          <button type="submit">OK</button>
+          <button type="submit">
+            {this.state.loading ? <i className="fa fa-spinner fa-pulse" /> : 'OK'}
+          </button>
         </Form>
         <List repositories={this.state.repositories} />
       </Container>
